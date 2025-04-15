@@ -198,11 +198,11 @@ function loadAssets() {
         acornSprite.onerror = () => handleError('acorn.png');
         pavesaSprite.onerror = () => handleError('Pavesa.png');
         backgroundImage1.onerror = () => handleError('Fondo1.png');
-        backgroundImage2.onerror = () => handleError('ureshii.png');
+        backgroundImage2.onerror = () => handleError('ureshii.jpg');
         backgroundImage3.onerror = () => handleError('Fondo2.jpg');
         backgroundImage4.onerror = () => handleError('Fondo3.jpeg');
-        backgroundImage5.onerror = () => handleError('neko.png');
-        backgroundImage6.onerror = () => handleError('oshimai.png');
+        backgroundImage5.onerror = () => handleError('neko.jpg');
+        backgroundImage6.onerror = () => handleError('oshimai.jpg');
         totoroSprite.onerror = () => handleError('totorito.png');
 
         // Set up load handlers
@@ -222,11 +222,11 @@ function loadAssets() {
         acornSprite.src = 'acorn.png';
         pavesaSprite.src = 'Pavesa.png';
         backgroundImage1.src = 'Fondo1.png';
-        backgroundImage2.src = 'ureshii.png';
+        backgroundImage2.src = 'ureshii.jpg';
         backgroundImage3.src = 'Fondo2.jpg';
         backgroundImage4.src = 'Fondo3.jpeg';
-        backgroundImage5.src = 'neko.png';
-        backgroundImage6.src = 'oshimai.png';
+        backgroundImage5.src = 'neko.jpg';
+        backgroundImage6.src = 'oshimai.jpg';
         totoroSprite.src = 'totorito.png';
     });
 }
@@ -492,10 +492,11 @@ function update() {
             };
         });
         
-        // Reset all acorns
+        // Reset all acorns and hide door
         acorns.forEach(acorn => {
             acorn.collected = false;
         });
+        door.visible = false; // Hide the door when acorns are taken
         score = 0;
         updateScoreDisplay();
     }
@@ -1078,53 +1079,39 @@ function nextLevel() {
             width: 80%;
             animation: modalAppear 0.5s ease-out;
             position: relative;
-            overflow: hidden;
         `;
         
-        // Add floating acorns
-        for (let i = 0; i < 4; i++) {
+        // Add decorative acorns
+        const acornContainer = document.createElement('div');
+        acornContainer.style.cssText = `
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        `;
+        
+        for (let i = 0; i < 3; i++) {
             const acorn = document.createElement('img');
             acorn.src = 'acorn.png';
             acorn.style.cssText = `
-                position: absolute;
                 width: 30px;
                 height: auto;
-                animation: floatAcorn${i} 3s infinite ease-in-out;
-                opacity: 0.8;
+                animation: floatAcorn 2s ease-in-out infinite;
+                animation-delay: ${i * 0.3}s;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
             `;
-            
-            // Position acorns at different corners
-            switch(i) {
-                case 0:
-                    acorn.style.top = '10px';
-                    acorn.style.left = '10px';
-                    break;
-                case 1:
-                    acorn.style.top = '10px';
-                    acorn.style.right = '10px';
-                    break;
-                case 2:
-                    acorn.style.bottom = '10px';
-                    acorn.style.left = '10px';
-                    break;
-                case 3:
-                    acorn.style.bottom = '10px';
-                    acorn.style.right = '10px';
-                    break;
-            }
-            
-            modalContent.appendChild(acorn);
+            acornContainer.appendChild(acorn);
         }
         
         const title = document.createElement('h2');
         title.textContent = '¡Felicidades!';
         title.style.cssText = `
             color: #4a2c0a;
-            margin: 0 0 20px 0;
+            margin: 20px 0 20px 0;
             font-size: 28px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
         `;
         
         const message = document.createElement('p');
@@ -1134,8 +1121,6 @@ function nextLevel() {
             margin: 0 0 25px 0;
             font-size: 18px;
             line-height: 1.5;
-            position: relative;
-            z-index: 1;
         `;
         
         const button = document.createElement('button');
@@ -1150,8 +1135,6 @@ function nextLevel() {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
         `;
         
         button.onmouseover = () => {
@@ -1172,7 +1155,7 @@ function nextLevel() {
             clearKeyboardStates();
         };
         
-        // Add keyframe animations for floating acorns
+        // Add keyframe animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes modalAppear {
@@ -1185,25 +1168,18 @@ function nextLevel() {
                     transform: scale(1);
                 }
             }
-            @keyframes floatAcorn0 {
-                0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                50% { transform: translate(5px, 5px) rotate(5deg); }
-            }
-            @keyframes floatAcorn1 {
-                0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                50% { transform: translate(-5px, 5px) rotate(-5deg); }
-            }
-            @keyframes floatAcorn2 {
-                0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                50% { transform: translate(5px, -5px) rotate(-5deg); }
-            }
-            @keyframes floatAcorn3 {
-                0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                50% { transform: translate(-5px, -5px) rotate(5deg); }
+            @keyframes floatAcorn {
+                0%, 100% {
+                    transform: translateY(0) rotate(0deg);
+                }
+                50% {
+                    transform: translateY(-10px) rotate(5deg);
+                }
             }
         `;
         document.head.appendChild(style);
         
+        modalContent.appendChild(acornContainer);
         modalContent.appendChild(title);
         modalContent.appendChild(message);
         modalContent.appendChild(button);
